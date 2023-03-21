@@ -141,7 +141,7 @@ def classify_file(file):
                 }
     else:
         return {
-            "prediction": "Error",
+            "prediction": "Error occurred while processing the file",
             "rf_probability": "N/A",
             "nn_prediction": "N/A"
         }

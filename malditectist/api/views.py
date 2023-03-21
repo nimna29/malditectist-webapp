@@ -15,6 +15,10 @@ from datetime import timedelta
 class FileUploadView(APIView):
     def post(self, request, format=None):
         file_obj = request.FILES['file']
+        if not file_obj.name.endswith('.exe'):
+            return Response({'error': 'Invalid file type. Only .exe files are supported.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         filename = default_storage.save(file_obj.name, file_obj)
         uploaded_file_url = os.path.join(settings.MEDIA_URL, filename)
 
@@ -32,6 +36,10 @@ def upload_file(request):
     file = request.FILES.get('file')
     if file is None:
         return Response({'error': 'File not found in request'}, status=status.HTTP_400_BAD_REQUEST)
+
+    if not file.name.endswith('.exe'):
+        return Response({'error': 'Invalid file type. Only .exe files are supported.'},
+                        status=status.HTTP_400_BAD_REQUEST)
 
     # Upload the file to Firebase Storage
     filename = file.name
