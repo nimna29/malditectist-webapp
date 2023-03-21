@@ -21,7 +21,7 @@ const FileUpload = () => {
         formData.append('file', selectedFile as File);
         try {
             const response = await axios.post(
-                'http://localhost:8000/api/upload/',
+                'http://localhost:8000/api/upload_file/',
                 formData,
                 {
                     headers: {
@@ -34,6 +34,7 @@ const FileUpload = () => {
                 rf_probability: response.data.rf_probability,
                 nn_prediction: response.data.nn_prediction,
             });
+            console.log(response.data);
         } catch (error) {
             console.error(error);
         }
@@ -61,8 +62,8 @@ const FileUpload = () => {
                 {mlResult && (
                     <>
                         <p>Prediction: {mlResult.prediction}</p>
-                        <p>Random forest probability: {mlResult.rf_probability}</p>
-                        <p>Neural network prediction: {mlResult.nn_prediction}</p>
+                        <p>Random Forest probability: {mlResult.rf_probability}</p>
+                        <p>Neural Network prediction: {mlResult.nn_prediction}</p>
                     </>
                 )}
             </div>
