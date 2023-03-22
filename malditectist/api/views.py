@@ -12,17 +12,23 @@ from firebase import bucket
 from datetime import timedelta
 
 
+# Define a class-based view to handle file uploads
 class FileUploadView(APIView):
     def post(self, request, format=None):
+        # Get the file object from the request
         file_obj = request.FILES['file']
+        
+        # Check if the file type is valid
         if not file_obj.name.endswith('.exe'):
             return Response({'error': 'Invalid file type. Only .exe files are supported.'},
                             status=status.HTTP_400_BAD_REQUEST)
         
+        # Get a unique key associated with the file
         unique_key = request.data.get('unique_key')
         if unique_key is None:
             return Response({'error': 'Unique key not found in request.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        # Save the file to the local file system
         filename = default_storage.save(file_obj.name, file_obj)
         uploaded_file_url = os.path.join(settings.MEDIA_URL, filename)
 
@@ -35,16 +41,20 @@ class FileUploadView(APIView):
         return Response({'uploaded_file_url': uploaded_file_url}, status=status.HTTP_201_CREATED)
 
 
+# Define a function-based view to handle file uploads
 @api_view(['POST'])
 def upload_file(request):
+    # Get the file object from the request
     file = request.FILES.get('file')
     if file is None:
         return Response({'error': 'File not found in request'}, status=status.HTTP_400_BAD_REQUEST)
 
+    # Check if the file type is valid
     if not file.name.endswith('.exe'):
         return Response({'error': 'Invalid file type. Only .exe files are supported.'},
                         status=status.HTTP_400_BAD_REQUEST)
     
+    # Get a unique key associated with the file
     unique_key = request.data.get('unique_key')
     if unique_key is None:
         return Response({'error': 'Unique key not found in request.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -54,9 +64,6 @@ def upload_file(request):
     blob = bucket.blob(filename)
     blob.upload_from_file(file)
 
-    # Get the public URL of the uploaded file
-    # file_url = blob.public_url
-
     # Get the private URL of the uploaded file
     file_url = blob.generate_signed_url(
         expiration=timedelta(minutes=30), method='GET')
@@ -65,5 +72,6 @@ def upload_file(request):
     result = classify_file(file)
     if result is None:
         return Response({'error': 'Failed to classify file'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
+    
+    # Return the result of the classification to the frontend
     return Response(result, status=status.HTTP_200_OK)
