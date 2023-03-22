@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import Dropzone from 'react-dropzone';
 
 interface MlResult {
@@ -13,42 +13,57 @@ const FileUpload = () => {
     const [mlResult, setMLResult] = useState<MlResult | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [uniqueKey, setUniqueKey] = useState<string>(Date.now().toString());
+    const [uploadProgress, setUploadProgress] = useState<number>(0);
 
     const handleFileSelect = (file: File[]) => {
         setSelectedFile(file[0]);
         setErrorMessage(null);
         setMLResult(null);
         setUniqueKey(Date.now().toString());
+        setUploadProgress(0);
     };
 
     const handleFileUpload = async () => {
+        if (selectedFile === undefined) {
+            return;
+        }
+
         const formData = new FormData();
-        formData.append('file', selectedFile as File);
+        formData.append('file', selectedFile);
         formData.append('unique_key', uniqueKey);
+
+        const config: AxiosRequestConfig = {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            onUploadProgress: (progressEvent) => {
+                const percentCompleted = Math.round(
+                    (progressEvent.loaded * 100) / (progressEvent.total ?? selectedFile.size)
+                );
+                setUploadProgress(percentCompleted);
+            },
+        };
 
         try {
             const response = await axios.post(
                 'http://localhost:8000/api/upload_file/',
                 formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
+                config
             );
             setMLResult({
                 prediction: response.data.prediction,
                 rf_probability: response.data.rf_probability,
                 nn_prediction: response.data.nn_prediction,
             });
-            console.log(response.data);
         } catch (error: any) {
             console.error(error);
-            if (error.response.status === 400) {
+            if (error.response && error.response.status === 400) {
                 setErrorMessage(error.response.data.error);
             } else {
                 setErrorMessage('An error occurred while uploading the file.');
             }
+        } finally {
+            setUploadProgress(0);
         }
     };
 
@@ -71,6 +86,9 @@ const FileUpload = () => {
             </button>
             {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
             <div>
+                {uploadProgress > 0 && (
+                    <p>Upload progress: {uploadProgress}%</p>
+                )}
                 {mlResult && (
                     <>
                         <p>Prediction: {mlResult.prediction}</p>
