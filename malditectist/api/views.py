@@ -18,6 +18,10 @@ class FileUploadView(APIView):
         if not file_obj.name.endswith('.exe'):
             return Response({'error': 'Invalid file type. Only .exe files are supported.'},
                             status=status.HTTP_400_BAD_REQUEST)
+        
+        unique_key = request.data.get('unique_key')
+        if unique_key is None:
+            return Response({'error': 'Unique key not found in request.'}, status=status.HTTP_400_BAD_REQUEST)
 
         filename = default_storage.save(file_obj.name, file_obj)
         uploaded_file_url = os.path.join(settings.MEDIA_URL, filename)
@@ -40,9 +44,13 @@ def upload_file(request):
     if not file.name.endswith('.exe'):
         return Response({'error': 'Invalid file type. Only .exe files are supported.'},
                         status=status.HTTP_400_BAD_REQUEST)
+    
+    unique_key = request.data.get('unique_key')
+    if unique_key is None:
+        return Response({'error': 'Unique key not found in request.'}, status=status.HTTP_400_BAD_REQUEST)
 
     # Upload the file to Firebase Storage
-    filename = file.name
+    filename = f"{unique_key}_{file.name}"
     blob = bucket.blob(filename)
     blob.upload_from_file(file)
 

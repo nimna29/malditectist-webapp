@@ -12,16 +12,20 @@ const FileUpload = () => {
     const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined);
     const [mlResult, setMLResult] = useState<MlResult | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [uniqueKey, setUniqueKey] = useState<string>(Date.now().toString());
 
     const handleFileSelect = (file: File[]) => {
         setSelectedFile(file[0]);
         setErrorMessage(null);
         setMLResult(null);
+        setUniqueKey(Date.now().toString());
     };
 
     const handleFileUpload = async () => {
         const formData = new FormData();
         formData.append('file', selectedFile as File);
+        formData.append('unique_key', uniqueKey);
+
         try {
             const response = await axios.post(
                 'http://localhost:8000/api/upload_file/',
