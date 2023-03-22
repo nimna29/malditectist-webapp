@@ -17,8 +17,12 @@ from django.contrib import admin
 from django.urls import path, include
 from api import views
 
+# Define URL patterns for the project
 urlpatterns = [
+    # Define a URL pattern for the admin interface
     path("admin/", admin.site.urls),
+    # Include the URL patterns defined in the app's urls.py file
     path('', include('api.urls')),
+    # Define a URL pattern for the file upload function-based view
     path('api/upload/', views.upload_file),
 ]
