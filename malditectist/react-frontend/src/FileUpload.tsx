@@ -86,7 +86,9 @@ const FileUpload = () => {
             </button>
             {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
             <div>
-                {uploadProgress > 0 && (
+                {uploadProgress === 100 ? (
+                    <p>Processing...!</p>
+                ) : uploadProgress > 0 && (
                     <p>Upload progress: {uploadProgress}%</p>
                 )}
                 {mlResult && (
@@ -94,9 +96,9 @@ const FileUpload = () => {
                         <p>Prediction: {mlResult.prediction}</p>
                         <p>Random Forest Probability: {mlResult.rf_probability}</p>
                         <p>Neural Network Prediction: {mlResult.nn_prediction}</p>
-                        <p>If the probability and prediction values are close to 100%, 
-                            it indicates that the file is a malware.<br/>
-                            Conversely, if the probability and prediction values are below 85%, 
+                        <p>If the probability and prediction values are close to 100%,
+                            it indicates that the file is a malware.<br />
+                            Conversely, if the probability and prediction values are below 85%,
                             it indicates that the file is not a malware and is a legitimate file.</p>
                     </>
                 )}

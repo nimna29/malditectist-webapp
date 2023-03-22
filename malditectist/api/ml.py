@@ -14,8 +14,6 @@ nn_model = models.load_model('api/nn_model.h5')
 scaler = joblib.load('api/scaler.joblib')
 
 # Define a function to extract the required features from the given file
-
-
 def extract_features(file_obj):
     try:
         # Get the file path and name
