@@ -14,8 +14,6 @@ nn_model = models.load_model('api/nn_model.h5')
 scaler = joblib.load('api/scaler.joblib')
 
 # Define a function to extract the required features from the given file
-
-
 def extract_features(file_obj):
     try:
         # Get the file path and name
@@ -141,7 +139,7 @@ def classify_file(file):
                 }
     else:
         return {
-            "prediction": "Error",
+            "prediction": "Error occurred while processing the file",
             "rf_probability": "N/A",
             "nn_prediction": "N/A"
         }
