@@ -1,6 +1,7 @@
 ## Developer speific files
 serviceAccountKey.json
 .vscode
+.env
 
 
 ## Ignore Visual Studio temporary files, build results, and
