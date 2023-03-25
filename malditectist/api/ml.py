@@ -4,7 +4,7 @@ import joblib
 import os
 import math
 import tensorflow.keras.models as models
-import tempfile
+from urllib.request import urlretrieve
 
 # Load the trained ml models
 rf_model = joblib.load('api/rf_model.joblib')
@@ -14,15 +14,11 @@ nn_model = models.load_model('api/nn_model.h5')
 scaler = joblib.load('api/scaler.joblib')
 
 # Define a function to extract the required features from the given file
-def extract_features(file_obj):
+def extract_features(file_url):
     try:
-        # Get the file path and name
-        file_path = os.path.join(tempfile.gettempdir(), file_obj.name)
+        # Download the file from Firebase Storage
+        file_path, _ = urlretrieve(file_url)
 
-        # Write the uploaded file to the temp directory
-        with open(file_path, 'wb+') as f:
-            for chunk in file_obj.chunks():
-                f.write(chunk)
         # Get the file size
         file_length = os.path.getsize(file_path)
 

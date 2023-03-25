@@ -1,44 +1,10 @@
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.core.files.storage import default_storage
-from django.conf import settings
-import os
-from google.cloud import storage
 from .ml import classify_file
 from rest_framework import status
 from rest_framework.decorators import api_view
 from firebase import bucket
 from datetime import timedelta
-
-
-# Define a class-based view to handle file uploads
-class FileUploadView(APIView):
-    def post(self, request, format=None):
-        # Get the file object from the request
-        file_obj = request.FILES['file']
-        
-        # Check if the file type is valid
-        if not file_obj.name.endswith('.exe'):
-            return Response({'error': 'Invalid file type. Only .exe files are supported.'},
-                            status=status.HTTP_400_BAD_REQUEST)
-        
-        # Get a unique key associated with the file
-        unique_key = request.data.get('unique_key')
-        if unique_key is None:
-            return Response({'error': 'Unique key not found in request.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Save the file to the local file system
-        filename = default_storage.save(file_obj.name, file_obj)
-        uploaded_file_url = os.path.join(settings.MEDIA_URL, filename)
-
-        # Upload the file to Firebase Storage
-        bucket = storage.bucket()
-        blob = bucket.blob(filename)
-        blob.upload_from_filename(os.path.join(settings.MEDIA_ROOT, filename))
-
-        # Send response to frontend
-        return Response({'uploaded_file_url': uploaded_file_url}, status=status.HTTP_201_CREATED)
 
 
 # Define a function-based view to handle file uploads
@@ -69,7 +35,7 @@ def upload_file(request):
         expiration=timedelta(minutes=30), method='GET')
 
     # Pass the file to the classify_file function for analysis
-    result = classify_file(file)
+    result = classify_file(file_url)
     if result is None:
         return Response({'error': 'Failed to classify file'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
